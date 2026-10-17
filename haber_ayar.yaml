@@ -1,0 +1,111 @@
+# ADIM 3 — Haber/makro özellikleri ayar dosyası
+# =============================================
+# Bu dosyadaki her özellik grubu AÇILIP KAPATILABİLİR ve parametrelidir.
+# Kod bu dosyayı okur; eksik anahtar için koddaki varsayılan kullanılır.
+# Katalog: ozellik_katalogu.md (script tarafından otomatik üretilir).
+
+genel:
+  # Barların kaynağı (FILE_COMMON altındaki BarExport.mq5 çıktısı)
+  barlar_dosyasi: "bars_mql5.csv"
+  # Çıktı
+  cikti_dosyasi: "haber_ozellikleri.csv"
+  katalog_dosyasi: "ozellik_katalogu.md"
+  # Zaman dilimi: tüm zamanlar SUNUCU saati (ölçüldü, fark 0)
+  zaman_dilimi: "sunucu"
+
+takvim:
+  aktif: true
+  # Takvim CSV'si (CalendarExport.mq5 çıktısı, FILE_COMMON altında)
+  dosya: "calendar_events.csv"
+  # Yalnızca bu ülke kodu (ISO 3166-1 alpha-2). Boş bırakılırsa filtre yok.
+  ulke_kodu: "US"
+  # Önem eşiği: bu ve üzeri önem seviyeleri kullanılır.
+  # Seçenekler: none < low < moderate < high
+  onem_esigi: "high"
+  # event_id ile filtre. Boş liste = filtre yok (tüm olaylar).
+  # ABD NFP örneği: [840030016]  (ölçüldü: "Tarım Dışı İstihdam", US, high)
+  event_id_filtresi: []
+
+  # --- bir sonraki yüksek önemli olaya kalan dakika
+  kalan_dakika:
+    aktif: true
+    ad: "takvim_kalan_dk"
+    # üst sınır (dk); bu süreden uzak olaylar bu değere kırpılır
+    ust_sinir_dk: 1440
+
+  # --- son yüksek önemli olaydan geçen dakika
+  gecen_dakika:
+    aktif: true
+    ad: "takvim_gecen_dk"
+    ust_sinir_dk: 1440
+
+  # --- olay penceresi bayrağı (olaydan -N/+M dk içinde mi)
+  pencere:
+    aktif: true
+    ad: "takvim_pencere"
+    once_dk: 15     # olaydan ÖNCE kaç dk
+    sonra_dk: 15    # olaydan SONRA kaç dk
+
+  # --- son olayın SÜRPRİZİ (z-skor, expanding std, geleceğe bakma yok)
+  surpriz_z:
+    aktif: true
+    ad: "takvim_surpriz_z"
+    # std hesabı için minimum geçmiş yayın sayısı; altındaysa NaN
+    min_gecmis: 5
+
+  # --- olay sonrası etkinin sönümlenmesi
+  sonumlenme:
+    aktif: true
+    ad: "takvim_surpriz_z_sonumlu"
+    # yarılanma ömrü (dk): sürpriz * exp(-gecen_dk / yarilanma)
+    yarilanma_dk: 240
+
+  # --- piyasa kapalı / hafta sonu bayrağı
+  piyasa_durumu:
+    aktif: true
+    ad_hafta_sonu: "takvim_hafta_sonu"
+    ad_piyasa_kapali: "takvim_piyasa_kapali"
+    # bir barın kapanışından sonraki bu kadar dk "piyasa kapalı" sayılır
+    gun_sonu_bosluk_dk: 0
+
+fred:
+  aktif: true
+  dosya: "fred_gunluk.csv"
+  # kullanilabilir_tarih'e eklenecek ek gecikme (saat). Varsayılan 0.
+  gecikme_saat: 0
+  # as-of birleştirme: geriye bakan (merge_asof direction="backward")
+  seriler:
+    dfii10_degisim:
+      aktif: true
+      ad: "fred_dfii10_degisim"
+      seri: "DFII10"
+      tip: "degisim"        # seviye | degisim
+    t10yie_degisim:
+      aktif: true
+      ad: "fred_t10yie_degisim"
+      seri: "T10YIE"
+      tip: "degisim"
+    dgs10_dgs2_fark:
+      aktif: true
+      ad: "fred_dgs10_dgs2_fark"
+      tip: "fark"           # iki seri farkı
+      seri_a: "DGS10"
+      seri_b: "DGS2"
+    vix_seviye:
+      aktif: true
+      ad: "fred_vix_seviye"
+      seri: "VIXCLS"
+      tip: "seviye"
+    vix_degisim:
+      aktif: true
+      ad: "fred_vix_degisim"
+      seri: "VIXCLS"
+      tip: "degisim"
+
+sizinti_testi:
+  # Kesme testi: T'ye kadar olan veriyle yeniden hesapla, T'den önceki barları karşılaştır
+  aktif: true
+  nokta_sayisi: 20
+  rastgele_tohum: 42
+  # tolerans (kayan nokta)
+  tolerans: 1e-9

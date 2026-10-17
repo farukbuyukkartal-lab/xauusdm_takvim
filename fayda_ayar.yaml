@@ -1,0 +1,83 @@
+# Adım 4 — Fayda testi ayarları
+# =================================
+# Tüm parametreler burada. Kod bu dosyayı okur; eksik anahtar için koddaki varsayılan kullanılır.
+# Model üretim koduna (main.py, EA) DOKUNULMAZ; bu script onları import edip OKUR.
+
+veri:
+  # Barlar (FILE_COMMON altındaki BarExport.mq5 çıktısı)
+  barlar_dosyasi: "bars_mql5.csv"
+  # Haber özellikleri (haber_ozellikleri.py çıktısı)
+  haber_dosyasi: "haber_ozellikleri.csv"
+  # Model kodunun bulunduğu klasör (features.py + labeling.py buradan import edilir)
+  model_kodu_klasoru: "./model_kodu"
+  # Etiket ufku (labeling.py'ye geçilir)
+  etiket_ufku: 32
+
+kilit:
+  # Son 6 ay KİLİTLİ. Kod bu dönemi OKUMAZ.
+  # Yalnızca bu bayrak true yapılırsa kilit açılır (varsayılan: KAPALI).
+  kilidi_ac: false
+  # Kilit başlangıcı (dahil) — bunun sonrası kullanılmaz
+  kilit_baslangici: "2026-04-17"
+
+bolme:
+  # Genişleyen pencereli walk-forward
+  tip: "walk_forward"
+  kat_sayisi: 6
+  # İlk eğitim penceresi (bar sayısı); veri kısıtlı olduğu için oran olarak da verilebilir
+  ilk_egitim_orani: 0.35
+  # Etiket ufku kadar boşluk (embargo/purge), bar cinsinden
+  embargo_bar: 32
+  # Katlar arası test penceresi oranı (kalan verinin bölünmesi)
+  test_orani: 0.10
+
+model:
+  # "auto": lightgbm varsa LightGBM, yoksa sklearn HistGradientBoostingClassifier
+  tip: "auto"
+  # Ağaç sayısı / iterasyon
+  n_estimators: 200
+  learning_rate: 0.05
+  max_depth: 4
+  max_iter_hgb: 200
+  min_samples_leaf: 200     # yeni: küçük yapraklar aşırı öğrenmeyi artırır
+  l2: 1.0                   # yeni: L2 düzenlemesi
+  egitim_alt_ornek: null        # null = hepsi; örn. 20000
+  rastgele_tohumlar: [11, 22, 33, 44, 55]
+  # Paralel koşu: işçi sayısı ve işçi başına BLAS/OpenMP iş parçacığı sınırı
+  n_jobs: 4
+  blas_thread_limit: 2         # threadpoolctl ile her işçide 2'ye sınırlanır
+  # Ölçekleme yalnızca EĞİTİM kısmından öğrenilir
+  olcekleme: "standard"
+
+metrikler:
+  # Sınıf bazında makro-F1 ve log-loss
+  makro_f1: true
+  log_loss: true
+  # Basit maliyetli simülasyon
+  simulasyon:
+    aktif: true
+    spread_usd: 0.25            # XAUUSDm tipik spread (USD/ons) — AYAR
+    # İşlem başına komisyon (USD/ons)
+    komisyon_usd: 0.0
+    # Olasılık eşiği: bunun üzerindeki en yüksek sınıf işlem sayılır
+    esik: 0.5
+    # Kaç bar sonra kapanış (etiket ufkuyla aynı olmalı)
+    tutma_bari: 32
+
+dilimler:
+  # Metrikler üç dilimde raporlanır
+  # 1) tüm barlar  2) olay penceresi (-1sa..+4sa)  3) olay dışı
+  olay_once_saat: 1
+  olay_sonra_saat: 4
+
+bootstrap:
+  aktif: true
+  blok_uzunlugu: 96            # ~1 gün (M15)
+  tekrar: 500
+  guven: 0.95
+
+hiz_testi:
+  # İlk koşuda küçük alt örnekle süreyi ölç
+  aktif: true
+  alt_ornek: 15000
+  kat_sayisi: 2
